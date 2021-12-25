@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/taxiapp?currentSchema=taxiapp
+    username: appadmin
+    password: appadmin
+    hikari:
+      connectionTimeout: 30000
+      maximumPoolSize: 30
+      maxLifeTime: 1800000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        #hbm2ddl.auto: create-only
+    show-sql: true
