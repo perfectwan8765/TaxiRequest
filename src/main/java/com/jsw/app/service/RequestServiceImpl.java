@@ -12,10 +12,12 @@ import com.jsw.app.entity.Request;
 import com.jsw.app.enums.RequestStatus;
 import com.jsw.app.enums.UserRole;
 import com.jsw.app.exception.AddressInvalidException;
+import com.jsw.app.exception.CustomException;
 import com.jsw.app.repository.MemberRepository;
 import com.jsw.app.repository.RequestRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -44,41 +46,40 @@ public class RequestServiceImpl implements RequestService {
     * @ author 정상완
     */
     @Override
-    public Request makeRequet (String address, String header) throws AddressInvalidException, AuthenticationCredentialsNotFoundException, Exception {
+    public Request makeRequet (String address, String header) throws CustomException {
         Optional<Member> memberWrapper;
         try {
             memberWrapper = getMemberFromToken(header);
         } catch (SignatureVerificationException se) {
             // Token 형식이 잘못된 경우
             log.error("Invalid token format: {}", se.getMessage());
-            throw new AuthenticationCredentialsNotFoundException("로그인이 필요합니다.");
+            throw new CustomException(HttpStatus.UNAUTHORIZED,  "로그인이 필요합니다.");
         }
 
         if (memberWrapper.isEmpty()) {
             log.error("Invalid Login Information");
-            throw new AuthenticationCredentialsNotFoundException("로그인이 필요합니다.");
+            throw new CustomException(HttpStatus.UNAUTHORIZED,  "로그인이 필요합니다.");
         }
 
         Member member = memberWrapper.get();
 
+        // 기사가 배차를 요청한 경우
         if (member.getUserType() != UserRole.PASSENGER) {
-            log.error("Call Taxi for only Passenger: member userType({})", member.getUserType());
-            throw new Exception("승객만 배차 요청할 수 있습니다.");
+            throw new CustomException(HttpStatus.FORBIDDEN,  "승객만 배차 요청할 수 있습니다.");
         }
 
+        // 아직 대기중인 배차가 있는 경우
         if (requestRepository.findNoAccetpedRequest(member.getId()) > 0) {
-            throw new Exception("아직 대기중인 배차 요청이 있습니다.");
+            throw new CustomException(HttpStatus.CONFLICT,  "아직 대기중인 배차 요청이 있습니다.");
         }
 
         // 주소 - 없는 경우
         if (address == null || address.isEmpty()) {
-            log.error("No Address information");
-            throw new AddressInvalidException("주소가 없습니다.");
+            throw new CustomException(HttpStatus.BAD_REQUEST,  "주소가 없습니다.");
         }
         // 주소 - 문자열(100)를 벗어난 경우
         if (address.length() > 100) {
-            log.error("Length of Address is less than 100");
-            throw new AddressInvalidException("주소는 100자 이하로 입력해주세요.");
+            throw new CustomException(HttpStatus.BAD_REQUEST,  "주소는 100자 이하로 입력해주세요.");
         }
 
         Date now = new Date(System.currentTimeMillis());
@@ -101,7 +102,7 @@ public class RequestServiceImpl implements RequestService {
     * @ author 정상완
     */
     @Override
-    public Request acceptRequest (Long taxiRequestId, String header) throws NullPointerException, IllegalArgumentException, AuthenticationCredentialsNotFoundException, Exception {
+    public Request acceptRequest (Long taxiRequestId, String header) throws CustomException {
         Optional<Member> memberWrapper;
 
         try {
@@ -109,34 +110,31 @@ public class RequestServiceImpl implements RequestService {
         } catch (SignatureVerificationException se) {
             // Token 형식이 잘못된 경우
             log.error("Invalid token format: {}", se.getMessage());
-            throw new AuthenticationCredentialsNotFoundException("로그인이 필요합니다.");
+            throw new CustomException(HttpStatus.UNAUTHORIZED,  "로그인이 필요합니다.");
         }
 
         if (memberWrapper.isEmpty()) {
             log.error("Invalid Login Information");
-            throw new AuthenticationCredentialsNotFoundException("로그인이 필요합니다.");
+            throw new CustomException(HttpStatus.UNAUTHORIZED,  "로그인이 필요합니다.");
         }
 
         Optional<Request> requestWrapper = requestRepository.findById(taxiRequestId);
 
         // 배차 미 존재
         if (requestWrapper.isEmpty()) {
-            log.error("No exists Taxi Request");
-            throw new NullPointerException("존재하지 않는 배차 요청입니다.");
+            throw new CustomException(HttpStatus.NOT_FOUND,  "존재하지 않는 배차 요청입니다.");
         }
         Request request = requestWrapper.get();
 
         // 이미 다른 기사에 의해 바차 요청이 수락된 경우
         if (request.getStatus().equals(RequestStatus.ACCEPT) && request.getDriverId() == null) {
-            log.error("Impossible Accept request, another driver accept");
-            throw new IllegalArgumentException("수락할 수 없는 배차 요청입니다. 다른 배차 요청을 선택하세요.");
+            throw new CustomException(HttpStatus.CONFLICT,  "수락할 수 없는 배차 요청입니다. 다른 배차 요청을 선택하세요.");
         }
 
         Member member = memberWrapper.get();
 
         if (member.getUserType() != UserRole.DRIVER) {
-            log.error("Accept Call for only Driver: member userType({})", member.getUserType());
-            throw new Exception("기사만 배차 요청을 수락할 수 있습니다.");
+            throw new CustomException(HttpStatus.FORBIDDEN,  "기사만 배차 요청을 수락할 수 있습니다.");
         }
 
         Date now = new Date(System.currentTimeMillis());

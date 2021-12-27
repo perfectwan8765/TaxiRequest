@@ -8,10 +8,12 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.jsw.app.entity.Member;
+import com.jsw.app.exception.CustomException;
 import com.jsw.app.exception.UserAlreadyExistException;
 import com.jsw.app.repository.MemberRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,17 +54,17 @@ public class MemberServiceImpl implements MemberService {
     */
     @Transactional
     @Override
-    public Member save(Member member) throws UserAlreadyExistException, InvalidParameterException {
+    public Member save(Member member) throws CustomException {
         // 올바른 이메일 주소인지 체크
         if (!validateEmail(member.getEmail())) {
             log.error("No Invalid Email: {}", member.getEmail());
-            throw new InvalidParameterException("올바른 이메일을 입력해주세요.");
+            throw new CustomException(HttpStatus.BAD_REQUEST, "올바른 이메일을 입력해주세요.");
         }
 
         // 존재하는 이메일인지 체크
         if (memberRepository.findByEmail(member.getEmail()).isPresent()) {
             log.error("Already exists Email: {}", member.getEmail());
-            throw new UserAlreadyExistException("이미 존재하는 이메일입니다.");
+            throw new CustomException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
         }
 
         Date now = new Date(System.currentTimeMillis());
