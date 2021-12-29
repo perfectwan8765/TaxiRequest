@@ -47,7 +47,7 @@ public class Member implements UserDetails {
     @Column(name="PASSWORD", nullable=false)
     private String password;
 
-    @Column(name="USER_TYPE", nullable=false)
+    @Column(name="USER_TYPE", nullable=false, length=1)
     @Convert(converter = RoleConverter.class)
     private UserRole userType;
 

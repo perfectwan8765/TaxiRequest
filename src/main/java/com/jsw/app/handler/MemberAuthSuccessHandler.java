@@ -39,7 +39,7 @@ public class MemberAuthSuccessHandler implements AuthenticationSuccessHandler {
         resultMap.put("accessToken", token);
 
         response.setStatus(HttpStatus.OK.value()); // 200
-        response.setContentType("applicatoin/json;charset=utf-8");
+        response.setContentType("applicatoin/json");
 
         OutputStream out = response.getOutputStream();
         out.write(mapper.writeValueAsString(resultMap).getBytes());

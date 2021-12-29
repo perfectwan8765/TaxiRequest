@@ -1,5 +1,6 @@
 package com.jsw.app.config;
 
+import com.jsw.app.handler.MemberAuthFailureHandler;
 import com.jsw.app.handler.MemberAuthSuccessHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private MemberAuthSuccessHandler authenticationSuccessHandler;
+
+    @Autowired
+    private MemberAuthFailureHandler authenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .usernameParameter("email")
             .passwordParameter("password")
             .successHandler(authenticationSuccessHandler)
+            .failureHandler(authenticationFailureHandler)
             .and()
             .sessionManagement().maximumSessions(1);
 
