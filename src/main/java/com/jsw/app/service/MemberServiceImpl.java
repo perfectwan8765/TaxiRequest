@@ -1,18 +1,18 @@
 package com.jsw.app.service;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import com.jsw.app.entity.Member;
 import com.jsw.app.exception.CustomException;
-import com.jsw.app.exception.UserAlreadyExistException;
 import com.jsw.app.repository.MemberRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,10 +34,13 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Member> memberWrapper = memberRepository.findByEmail(email);
-        Member member = memberWrapper.orElseThrow(() -> new UsernameNotFoundException("아이디와 비밀번호를 확인해주세요"));
+        Member member = memberWrapper.orElseThrow(() -> new UsernameNotFoundException(messageSource.getMessage("err.login.infoCheck", null, Locale.getDefault())));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
@@ -58,13 +61,13 @@ public class MemberServiceImpl implements MemberService {
         // 올바른 이메일 주소인지 체크
         if (!validateEmail(member.getEmail())) {
             log.error("No Invalid Email: {}", member.getEmail());
-            throw new CustomException(HttpStatus.BAD_REQUEST, "올바른 이메일을 입력해주세요.");
+            throw new CustomException(HttpStatus.BAD_REQUEST, messageSource.getMessage("err.login.validEmail", null, Locale.getDefault()));
         }
 
         // 존재하는 이메일인지 체크
         if (memberRepository.findByEmail(member.getEmail()).isPresent()) {
             log.error("Already exists Email: {}", member.getEmail());
-            throw new CustomException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
+            throw new CustomException(HttpStatus.CONFLICT, messageSource.getMessage("err.login.existsEmail", null, Locale.getDefault()));
         }
 
         Date now = new Date(System.currentTimeMillis());

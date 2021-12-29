@@ -3,7 +3,6 @@ package com.jsw.app.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +12,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.jsw.app.converter.StatusConverter;
 import com.jsw.app.enums.RequestStatus;
 
 import lombok.Getter;
