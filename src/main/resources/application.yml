@@ -15,3 +15,7 @@ spring:
         format_sql: true
         #hbm2ddl.auto: create-only
     show-sql: true
+jwt:
+  prefix: token
+  secretKey: taxiapp
+  expireTime: 864000000 #millisecond

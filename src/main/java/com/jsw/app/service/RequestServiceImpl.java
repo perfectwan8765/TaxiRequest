@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.jsw.app.entity.Member;
 import com.jsw.app.entity.Request;
@@ -15,6 +13,7 @@ import com.jsw.app.enums.UserRole;
 import com.jsw.app.exception.CustomException;
 import com.jsw.app.repository.MemberRepository;
 import com.jsw.app.repository.RequestRepository;
+import com.jsw.app.utils.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -35,6 +34,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public List<Request> getRequestList ()  {
@@ -157,12 +159,7 @@ public class RequestServiceImpl implements RequestService {
     * @ author 정상완
     */
     private Optional<Member> getMemberFromToken (String header) throws SignatureVerificationException {
-        String email = JWT.require(Algorithm.HMAC512("taxiapi".getBytes()))
-                    .build()
-                    .verify(header.replace("token ", ""))
-                    .getSubject();
-
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmail(jwtUtil.getSubjectForHeader(header));
     }
     
 }
