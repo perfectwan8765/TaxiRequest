@@ -61,13 +61,13 @@ public class MemberServiceImpl implements MemberService {
         // 올바른 이메일 주소인지 체크
         if (!validateEmail(member.getEmail())) {
             log.error("No Invalid Email: {}", member.getEmail());
-            throw new CustomException(HttpStatus.BAD_REQUEST, messageSource.getMessage("err.login.validEmail", null, Locale.getDefault()));
+            throw new CustomException(HttpStatus.BAD_REQUEST, "err.login.validEmail");
         }
 
         // 존재하는 이메일인지 체크
         if (memberRepository.findByEmail(member.getEmail()).isPresent()) {
             log.error("Already exists Email: {}", member.getEmail());
-            throw new CustomException(HttpStatus.CONFLICT, messageSource.getMessage("err.login.existsEmail", null, Locale.getDefault()));
+            throw new CustomException(HttpStatus.BAD_REQUEST, "err.login.existsEmail");
         }
 
         Date now = new Date(System.currentTimeMillis());
