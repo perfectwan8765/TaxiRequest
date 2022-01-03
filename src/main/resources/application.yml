@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/taxiapp?currentSchema=taxiapp
-    username: appadmin
-    password: appadmin
+    url: ENC(cuLOhHRtVIguaunfYi2h6VVxgCbF1bt6c1ZZluglf5p4Op2TyL4xFMfWB4wusDjL5blT6JHUyAUBLXRF2JzKuOBPoeJW64tg)
+    username: ENC(VONpVwD4Rb/FO1n/sehxpFVNIDT8xCU0)
+    password: ENC(VONpVwD4Rb/FO1n/sehxpFVNIDT8xCU0)
     hikari:
       connectionTimeout: 30000
       maximumPoolSize: 30
@@ -15,7 +15,10 @@ spring:
         format_sql: true
         #hbm2ddl.auto: create-only
     show-sql: true
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
 jwt:
   prefix: token
-  secretKey: taxiapp
+  secretKey: ENC(HbToPk+jpbyhLBSGCjjCzg==)
   expireTime: 864000000 #millisecond
