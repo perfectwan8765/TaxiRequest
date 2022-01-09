@@ -1,6 +1,5 @@
 # Taxi 배차 앱 API
 > 택시 배차 서비스가 잘 동작할지 검증하기 위한 최소 기능 구현   
-> DRAMA & COMPANY Server Development Recruiting Assingnment 과제
       
 ## Tech Stack
 ![Java](https://img.shields.io/badge/Java-e51f24.svg?&style=for-the-badge&logo=Java&logoColor=white)
