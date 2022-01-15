@@ -2,6 +2,8 @@ package com.jsw.app.utils;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.jsw.app.properties.JwtConfigProperty;
@@ -26,6 +28,17 @@ public class JwtUtil {
             .withSubject(subject)
             .withExpiresAt(new Date(System.currentTimeMillis() + property.getExpireTime()))
             .sign(Algorithm.HMAC512(property.getSecretKey().getBytes()));
+    }
+
+    /**
+    * HTTPServletRequest에서 JWT Token Subject 추출
+    * @param request HTTP Request
+    * @return JWT Token Subject
+    * @ author 정상완
+    */
+    public String getSubjectForHeader (HttpServletRequest request) {
+        String header = request.getHeader(property.getHeader());
+        return getSubjectForHeader(header);
     }
 
     /**

@@ -13,6 +13,7 @@ import com.jsw.app.exception.CustomException;
 import com.jsw.app.repository.MemberRepository;
 import com.jsw.app.repository.RequestRepository;
 import com.jsw.app.utils.JwtUtil;
+import com.jsw.app.utils.facade.IAuthenticationFacade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ public class RequestServiceImpl implements RequestService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private IAuthenticationFacade authenticationFacade;
+
     @Override
     public List<Request> getRequestList ()  {
         return requestRepository.findAllByOrderByCreatedAtDesc();
@@ -46,22 +50,8 @@ public class RequestServiceImpl implements RequestService {
     * @ author 정상완
     */
     @Override
-    public Request makeRequet (String address, String header) throws CustomException {
-        Optional<Member> memberWrapper;
-        try {
-            memberWrapper = getMemberFromToken(header);
-        } catch (SignatureVerificationException se) {
-            // Token 형식이 잘못된 경우
-            log.error("Invalid token format: {}", se.getMessage());
-            throw new CustomException(HttpStatus.UNAUTHORIZED, "err.login.needLogin");
-        }
-
-        if (memberWrapper.isEmpty()) {
-            log.error("Invalid Login Information");
-            throw new CustomException(HttpStatus.UNAUTHORIZED, "err.login.needLogin");
-        }
-
-        Member member = memberWrapper.get();
+    public Request makeRequet (String address) throws CustomException {
+        Member member = memberRepository.findByEmail(authenticationFacade.getAuthentication().getName()).get();
 
         // 기사가 배차를 요청한 경우
         if (member.getUserType() != UserRole.PASSENGER) {
@@ -102,22 +92,7 @@ public class RequestServiceImpl implements RequestService {
     * @ author 정상완
     */
     @Override
-    public Request acceptRequest (Long taxiRequestId, String header) throws CustomException {
-        Optional<Member> memberWrapper;
-
-        try {
-            memberWrapper = getMemberFromToken(header);
-        } catch (SignatureVerificationException se) {
-            // Token 형식이 잘못된 경우
-            log.error("Invalid token format: {}", se.getMessage());
-            throw new CustomException(HttpStatus.UNAUTHORIZED, "err.login.needLogin");
-        }
-
-        if (memberWrapper.isEmpty()) {
-            log.error("Invalid Login Information");
-            throw new CustomException(HttpStatus.UNAUTHORIZED, "err.login.needLogin");
-        }
-
+    public Request acceptRequest (Long taxiRequestId) throws CustomException {
         Optional<Request> requestWrapper = requestRepository.findById(taxiRequestId);
 
         // 배차 미 존재
@@ -131,7 +106,7 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(HttpStatus.CONFLICT, "err.request.unacceptableRequest");
         }
 
-        Member member = memberWrapper.get();
+        Member member = memberRepository.findByEmail(authenticationFacade.getAuthentication().getName()).get();
 
         if (member.getUserType() != UserRole.DRIVER) {
             throw new CustomException(HttpStatus.FORBIDDEN, "err.request.onlyAcceptDriver");
@@ -153,6 +128,7 @@ public class RequestServiceImpl implements RequestService {
     * @return Optional<Member> Member 객체
     * @ author 정상완
     */
+    @Deprecated
     private Optional<Member> getMemberFromToken (String header) throws SignatureVerificationException {
         return memberRepository.findByEmail(jwtUtil.getSubjectForHeader(header));
     }

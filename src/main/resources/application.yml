@@ -30,5 +30,6 @@ jasypt:
     bean: jasyptStringEncryptor
 jwt:
   prefix: token
+  header: Authorization
   secretKey: ENC(HbToPk+jpbyhLBSGCjjCzg==)
   expireTime: 864000000 #millisecond

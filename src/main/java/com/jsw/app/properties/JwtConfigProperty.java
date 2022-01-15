@@ -13,6 +13,7 @@ import lombok.Setter;
 public class JwtConfigProperty {
 
     private String prefix;
+    private String header;
     private String secretKey;
     private Long expireTime;
     

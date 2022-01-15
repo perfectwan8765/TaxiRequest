@@ -1,5 +1,6 @@
 package com.jsw.app.config;
 
+import com.jsw.app.filter.JwtTokenFilter;
 import com.jsw.app.handler.MemberAuthFailureHandler;
 import com.jsw.app.handler.MemberAuthSuccessHandler;
 
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +31,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public JwtTokenFilter jwtTokenFilter() {
+        return new JwtTokenFilter();
+    }
+
     @Override
     protected void configure (HttpSecurity http) throws Exception {
 
@@ -37,7 +44,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/users/sign-in").permitAll()
-            .antMatchers("/**").permitAll();
+            // .antMatchers("/**").permitAll()
+            .anyRequest().authenticated();
+
+        http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // Login
         http.formLogin()

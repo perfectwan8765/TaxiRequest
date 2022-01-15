@@ -32,14 +32,12 @@ public class TaxiController {
 
     @PostMapping("/taxi-requests")
     public ResponseEntity<Request> callTaxi (HttpServletRequest servletRequest, @RequestParam("address") String address) {
-        String header = servletRequest.getHeader("Authorization");
-        return ResponseEntity.ok(requestService.makeRequet(address, header));
+        return ResponseEntity.ok(requestService.makeRequet(address));
     }
 
     @PostMapping("/taxi-requests/{taxiRequestId}/accept")
     public ResponseEntity<Request> acceptCall (HttpServletRequest servletRequest, @PathVariable("taxiRequestId") Long taxiRequestId) {
-        String header = servletRequest.getHeader("Authorization");
-        return ResponseEntity.ok(requestService.acceptRequest(taxiRequestId, header));
+        return ResponseEntity.ok(requestService.acceptRequest(taxiRequestId));
     }
 
 }

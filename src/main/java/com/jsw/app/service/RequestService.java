@@ -9,8 +9,8 @@ public interface RequestService {
 
     public List<Request> getRequestList();
 
-    public Request makeRequet (String address, String header) throws CustomException;
+    public Request makeRequet (String address) throws CustomException;
 
-    public Request acceptRequest (Long taxiRequestId, String header) throws CustomException;
+    public Request acceptRequest (Long taxiRequestId) throws CustomException;
     
 }
